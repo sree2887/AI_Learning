@@ -1,0 +1,17 @@
+# News ingestion
+newsapi-python
+feedparser
+
+# Stock market data
+alpha_vantage
+requests
+
+# Sentiment & AI analysis
+anthropic
+
+# PDF report generation
+reportlab
+
+# Data processing
+pandas
+python-dotenv

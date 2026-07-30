@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maze Escape</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a2e;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  #game-container {
+    text-align: center;
+    padding: 10px;
+    max-width: 100vw;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.3rem;
+    background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    color: #888;
+    margin-bottom: 1.2rem;
+  }
+
+  #menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .btn {
+    width: 220px;
+    padding: 14px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: 2px solid;
+    border-radius: 10px;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s;
+  }
+
+  .btn:hover { transform: scale(1.06); }
+
+  .btn-easy   { color: #4cff8e; border-color: #4cff8e; }
+  .btn-easy:hover   { background: #4cff8e22; }
+  .btn-medium { color: #ffd84c; border-color: #ffd84c; }
+  .btn-medium:hover { background: #ffd84c22; }
+  .btn-hard   { color: #ff4c6e; border-color: #ff4c6e; }
+  .btn-hard:hover   { background: #ff4c6e22; }
+
+  #hud {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+
+  #hud span {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  #level-label { color: #aaa; }
+  #timer { color: #00d4ff; font-variant-numeric: tabular-nums; }
+  #points-display { color: #ffd84c; }
+
+  #canvas-wrapper {
+    display: none;
+    justify-content: center;
+    align-items: center;
+  }
+
+  canvas {
+    border: 2px solid #333;
+    border-radius: 6px;
+  }
+
+  #win-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  #win-screen h2 {
+    font-size: 2rem;
+    color: #4cff8e;
+  }
+
+  #win-screen .stat {
+    font-size: 1.2rem;
+  }
+
+  #mobile-controls {
+    display: none;
+    margin-top: 14px;
+    gap: 6px;
+  }
+
+  .arrow-btn {
+    width: 56px;
+    height: 56px;
+    font-size: 1.6rem;
+    background: #1a1a4e;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .arrow-btn:active { background: #2a2a6e; }
+
+  @media (pointer: coarse) {
+    #mobile-controls { display: grid !important; grid-template-areas: ". up ." "left down right"; grid-template-columns: repeat(3, 56px); justify-content: center; }
+    .arrow-up    { grid-area: up; }
+    .arrow-left  { grid-area: left; }
+    .arrow-down  { grid-area: down; }
+    .arrow-right { grid-area: right; }
+  }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <h1>Maze Escape</h1>
+  <p class="subtitle">Navigate from the center to the exit. Use arrow keys.</p>
+
+  <div id="menu">
+    <button class="btn btn-easy" onclick="startGame('easy')">Easy</button>
+    <button class="btn btn-medium" onclick="startGame('medium')">Medium</button>
+    <button class="btn btn-hard" onclick="startGame('hard')">Hard</button>
+  </div>
+
+  <div id="hud">
+    <span id="level-label"></span>
+    <span id="timer">00:00</span>
+    <span id="points-display">Points: 1000</span>
+  </div>
+
+  <div id="canvas-wrapper">
+    <canvas id="mazeCanvas"></canvas>
+  </div>
+
+  <div id="mobile-controls">
+    <button class="arrow-btn arrow-up" onclick="movePlayer(0,-1)">&uarr;</button>
+    <button class="arrow-btn arrow-left" onclick="movePlayer(-1,0)">&larr;</button>
+    <button class="arrow-btn arrow-down" onclick="movePlayer(0,1)">&darr;</button>
+    <button class="arrow-btn arrow-right" onclick="movePlayer(1,0)">&rarr;</button>
+  </div>
+
+  <div id="win-screen">
+    <h2 id="win-title">You Escaped!</h2>
+    <p class="stat" id="win-time"></p>
+    <p class="stat" id="win-points"></p>
+    <button class="btn btn-easy" onclick="showMenu()" style="margin-top:10px;">Play Again</button>
+  </div>
+</div>
+
+<script>
+// ---------- constants ----------
+const CONFIG = {
+  easy:   { rows: 11, cols: 11, startPoints: 1000, decayPerSec: 5,  color: '#4cff8e' },
+  medium: { rows: 21, cols: 21, startPoints: 2000, decayPerSec: 8,  color: '#ffd84c' },
+  hard:   { rows: 31, cols: 31, startPoints: 3000, decayPerSec: 10, color: '#ff4c6e' },
+};
+
+const WALL = 1, PATH = 0;
+
+// ---------- state ----------
+let maze, playerR, playerC, exitR, exitC;
+let cfg, timerStart, timerInterval, currentPoints;
+let canvas, ctx;
+
+// ---------- maze generation (recursive backtracker) ----------
+function generateMaze(rows, cols) {
+  // grid: odd-indexed cells are passages; even-indexed are walls
+  const grid = Array.from({ length: rows }, () => new Uint8Array(cols).fill(WALL));
+
+  function carve(r, c) {
+    grid[r][c] = PATH;
+    const dirs = [[0,2],[0,-2],[2,0],[-2,0]].sort(() => Math.random() - 0.5);
+    for (const [dr, dc] of dirs) {
+      const nr = r + dr, nc = c + dc;
+      if (nr > 0 && nr < rows && nc > 0 && nc < cols && grid[nr][nc] === WALL) {
+        grid[r + dr / 2][c + dc / 2] = PATH; // knock wall between
+        carve(nr, nc);
+      }
+    }
+  }
+
+  // start carving from (1,1)
+  carve(1, 1);
+  return grid;
+}
+
+// ---------- drawing ----------
+function drawMaze() {
+  const { rows, cols, cellSize } = cfg;
+  canvas.width  = cols * cellSize;
+  canvas.height = rows * cellSize;
+  ctx.fillStyle = '#0f0f3a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // walls
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (maze[r][c] === WALL) {
+        ctx.fillStyle = '#1e1e5a';
+        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        ctx.strokeStyle = '#2a2a70';
+        ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
+      }
+    }
+  }
+
+  // exit glow
+  ctx.fillStyle = '#4cff8e55';
+  ctx.fillRect(exitC * cellSize - 2, exitR * cellSize - 2, cellSize + 4, cellSize + 4);
+  ctx.fillStyle = '#4cff8e';
+  ctx.fillRect(exitC * cellSize, exitR * cellSize, cellSize, cellSize);
+  ctx.fillStyle = '#fff';
+  ctx.font = `${cellSize * 0.6}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('E', exitC * cellSize + cellSize / 2, exitR * cellSize + cellSize / 2);
+
+  // player
+  const px = playerC * cellSize + cellSize / 2;
+  const py = playerR * cellSize + cellSize / 2;
+  const radius = cellSize * 0.38;
+  ctx.beginPath();
+  ctx.arc(px, py, radius, 0, Math.PI * 2);
+  ctx.fillStyle = cfg.color;
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+// ---------- timer / points ----------
+function startTimer() {
+  timerStart = Date.now();
+  currentPoints = cfg.startPoints;
+  updateHud();
+  timerInterval = setInterval(() => {
+    const elapsed = (Date.now() - timerStart) / 1000;
+    currentPoints = Math.max(0, Math.round(cfg.startPoints - elapsed * cfg.decayPerSec));
+    updateHud();
+  }, 200);
+}
+
+function updateHud() {
+  const sec = Math.floor((Date.now() - timerStart) / 1000);
+  const m = String(Math.floor(sec / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
+  document.getElementById('timer').textContent = `${m}:${s}`;
+  document.getElementById('points-display').textContent = `Points: ${currentPoints}`;
+}
+
+// ---------- player movement ----------
+function movePlayer(dc, dr) {
+  const nr = playerR + dr;
+  const nc = playerC + dc;
+  if (nr < 0 || nr >= cfg.rows || nc < 0 || nc >= cfg.cols) return;
+  if (maze[nr][nc] === WALL) return;
+  playerR = nr;
+  playerC = nc;
+  drawMaze();
+
+  if (playerR === exitR && playerC === exitC) winGame();
+}
+
+// ---------- win ----------
+function winGame() {
+  clearInterval(timerInterval);
+  const elapsed = ((Date.now() - timerStart) / 1000).toFixed(1);
+  document.getElementById('canvas-wrapper').style.display = 'none';
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('mobile-controls').style.display = 'none';
+
+  const ws = document.getElementById('win-screen');
+  ws.style.display = 'flex';
+  document.getElementById('win-title').textContent = currentPoints > 0 ? 'You Escaped!' : 'You Escaped! (but slow)';
+  document.getElementById('win-time').textContent  = `Time: ${elapsed}s`;
+  document.getElementById('win-points').textContent = `Score: ${currentPoints}`;
+}
+
+// ---------- pick exit on maze border ----------
+function pickExit(rows, cols) {
+  // collect all path cells on the border
+  const candidates = [];
+  for (let c = 0; c < cols; c++) {
+    if (maze[0][c] === PATH) candidates.push([0, c]);
+    if (maze[rows - 1][c] === PATH) candidates.push([rows - 1, c]);
+  }
+  for (let r = 0; r < rows; r++) {
+    if (maze[r][0] === PATH) candidates.push([r, 0]);
+    if (maze[r][cols - 1] === PATH) candidates.push([r, cols - 1]);
+  }
+
+  if (candidates.length === 0) {
+    // force an exit on the last row
+    const ec = cols - 2;
+    maze[rows - 1][ec] = PATH;
+    return [rows - 1, ec];
+  }
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+// ---------- ensure path from center to exit using BFS ----------
+function ensurePath(sr, sc, er, ec) {
+  // BFS to check reachability
+  const visited = Array.from({ length: cfg.rows }, () => new Uint8Array(cfg.cols));
+  const queue = [[sr, sc]];
+  visited[sr][sc] = 1;
+  while (queue.length) {
+    const [r, c] = queue.shift();
+    if (r === er && c === ec) return; // already reachable
+    for (const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < cfg.rows && nc >= 0 && nc < cfg.cols && !visited[nr][nc] && maze[nr][nc] === PATH) {
+        visited[nr][nc] = 1;
+        queue.push([nr, nc]);
+      }
+    }
+  }
+  // not reachable — carve a direct path (shouldn't normally happen)
+  let cr = sr, cc = sc;
+  while (cr !== er || cc !== ec) {
+    if (cr < er) cr++; else if (cr > er) cr--;
+    else if (cc < ec) cc++; else if (cc > ec) cc--;
+    maze[cr][cc] = PATH;
+  }
+}
+
+// ---------- start game ----------
+function startGame(level) {
+  cfg = { ...CONFIG[level] };
+  const { rows, cols } = cfg;
+
+  // compute cellSize to fit the viewport with padding for HUD/title
+  const maxW = window.innerWidth - 40;   // 20px padding each side
+  const maxH = window.innerHeight - 120; // room for title + HUD
+  cfg.cellSize = Math.max(4, Math.floor(Math.min(maxW / cols, maxH / rows)));
+
+  maze = generateMaze(rows, cols);
+
+  // player at center (nearest odd coords)
+  playerR = Math.floor(rows / 2) | 1;
+  playerC = Math.floor(cols / 2) | 1;
+  if (playerR % 2 === 0) playerR--;
+  if (playerC % 2 === 0) playerC--;
+  maze[playerR][playerC] = PATH;
+
+  [exitR, exitC] = pickExit(rows, cols);
+  ensurePath(playerR, playerC, exitR, exitC);
+
+  // UI
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('win-screen').style.display = 'none';
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('level-label').textContent = level.charAt(0).toUpperCase() + level.slice(1);
+
+  canvas = document.getElementById('mazeCanvas');
+  ctx = canvas.getContext('2d');
+  document.getElementById('canvas-wrapper').style.display = 'flex';
+
+  drawMaze();
+  startTimer();
+}
+
+function showMenu() {
+  clearInterval(timerInterval);
+  document.getElementById('win-screen').style.display = 'none';
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('canvas-wrapper').style.display = 'none';
+  document.getElementById('menu').style.display = 'flex';
+}
+
+// ---------- keyboard ----------
+document.addEventListener('keydown', (e) => {
+  switch (e.key) {
+    case 'ArrowUp':    e.preventDefault(); movePlayer(0, -1); break;
+    case 'ArrowDown':  e.preventDefault(); movePlayer(0, 1);  break;
+    case 'ArrowLeft':  e.preventDefault(); movePlayer(-1, 0); break;
+    case 'ArrowRight': e.preventDefault(); movePlayer(1, 0);  break;
+  }
+});
+</script>
+</body>
+</html>

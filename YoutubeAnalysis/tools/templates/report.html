@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+
+/* ── Google Fonts (embedded via @import for WeasyPrint) ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Page Setup ── */
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+@page cover {
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  background: #1a1a2e;
+  color: #eaeaea;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ── Shared Page Shell ── */
+.page {
+  width: 297mm;
+  height: 210mm;
+  background: #1a1a2e;
+  page-break-after: always;
+  overflow: hidden;
+  position: relative;
+}
+
+.page:last-child {
+  page-break-after: avoid;
+}
+
+/* ── Accent elements ── */
+.accent-bar {
+  width: 100%;
+  height: 3px;
+  background: #e94560;
+}
+
+.accent-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e94560;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ── Page Header ── */
+.page-header {
+  padding: 14px 20px 0 20px;
+  border-bottom: 2px solid #e94560;
+  padding-bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.page-header .page-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+}
+
+.page-header .page-subtitle {
+  font-size: 8.5px;
+  color: #e94560;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
+}
+
+.page-header .report-tag {
+  font-size: 8px;
+  color: #555577;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+/* ════════════════════════════════════════
+   PAGE 1 — COVER
+════════════════════════════════════════ */
+.cover {
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 210mm;
+  position: relative;
+}
+
+.cover-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(233,69,96,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(233,69,96,0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.cover-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #e94560, #0f3460, #e94560);
+}
+
+.cover-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0f3460, #e94560, #0f3460);
+}
+
+.cover-left-accent {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #e94560, #0f3460);
+}
+
+.cover-content {
+  text-align: center;
+  z-index: 1;
+}
+
+.cover-eyebrow {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #e94560;
+  margin-bottom: 12px;
+}
+
+.cover-title {
+  font-size: 52px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -1.5px;
+  line-height: 1.05;
+  margin-bottom: 6px;
+}
+
+.cover-title span {
+  color: #e94560;
+}
+
+.cover-subtitle {
+  font-size: 18px;
+  font-weight: 300;
+  color: #aaaacc;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.cover-divider {
+  width: 60px;
+  height: 2px;
+  background: #e94560;
+  margin: 0 auto 24px;
+}
+
+.cover-date-badge {
+  display: inline-block;
+  background: rgba(233,69,96,0.12);
+  border: 1px solid rgba(233,69,96,0.4);
+  border-radius: 20px;
+  padding: 6px 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e94560;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.cover-tagline {
+  font-size: 9px;
+  color: #555577;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ════════════════════════════════════════
+   PAGE 2 — EXECUTIVE SUMMARY
+════════════════════════════════════════ */
+.summary-body {
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.insight-card {
+  background: #16213e;
+  border-left: 3px solid #e94560;
+  border-radius: 0 6px 6px 0;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.insight-number {
+  background: #e94560;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  width: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.insight-text {
+  padding: 8px 12px;
+  font-size: 9.5px;
+  color: #d8d8ee;
+  line-height: 1.55;
+  flex: 1;
+}
+
+/* ════════════════════════════════════════
+   PAGE 3–7 — CHART PAGES
+════════════════════════════════════════ */
+.chart-body {
+  padding: 8px 16px 6px;
+  height: calc(210mm - 46px);
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-body img {
+  width: 100%;
+  flex: 1;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.chart-caption {
+  font-size: 7.5px;
+  color: #555577;
+  font-style: italic;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* ════════════════════════════════════════
+   PAGE 8 — TOP VIDEOS TABLE
+════════════════════════════════════════ */
+.table-body {
+  padding: 10px 20px;
+}
+
+table.videos {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.5px;
+}
+
+table.videos thead tr {
+  background: #e94560;
+}
+
+table.videos thead th {
+  padding: 7px 10px;
+  text-align: left;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-size: 7.5px;
+}
+
+table.videos tbody tr:nth-child(even) {
+  background: #16213e;
+}
+
+table.videos tbody tr:nth-child(odd) {
+  background: #1e2542;
+}
+
+table.videos tbody td {
+  padding: 6px 10px;
+  color: #d0d0e8;
+  border-bottom: 1px solid #2d2d4e;
+}
+
+table.videos tbody td.rank {
+  font-weight: 700;
+  color: #e94560;
+  text-align: center;
+  width: 30px;
+}
+
+table.videos tbody td.engagement {
+  font-weight: 600;
+  color: #06d6a0;
+}
+
+table.videos tbody td.views {
+  color: #aaaacc;
+}
+
+/* ════════════════════════════════════════
+   PAGE 9 — CONTENT IDEAS
+════════════════════════════════════════ */
+.ideas-body {
+  padding: 12px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.idea-card {
+  background: #16213e;
+  border: 1px solid #2d2d4e;
+  border-top: 2px solid #e94560;
+  border-radius: 6px;
+  padding: 10px 12px;
+  position: relative;
+}
+
+.idea-number {
+  font-size: 28px;
+  font-weight: 800;
+  color: rgba(233,69,96,0.12);
+  position: absolute;
+  top: 4px;
+  right: 10px;
+  line-height: 1;
+}
+
+.idea-label {
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #e94560;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.idea-text {
+  font-size: 9px;
+  color: #d0d0e8;
+  line-height: 1.55;
+  padding-right: 24px;
+}
+
+/* ════════════════════════════════════════
+   FOOTER STRIP (all pages except cover)
+════════════════════════════════════════ */
+.page-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: #0f0f1a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.page-footer .footer-left {
+  font-size: 6.5px;
+  color: #333355;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.page-footer .footer-right {
+  font-size: 6.5px;
+  color: #333355;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ════ PAGE 1: COVER ════ -->
+<div class="page cover">
+  <div class="cover-grid"></div>
+  <div class="cover-top-bar"></div>
+  <div class="cover-bottom-bar"></div>
+  <div class="cover-left-accent"></div>
+  <div class="cover-content">
+    <div class="cover-eyebrow">Weekly Intelligence Report</div>
+    <div class="cover-title">AI &amp; <span>Automation</span></div>
+    <div class="cover-subtitle">YouTube Trends Report</div>
+    <div class="cover-divider"></div>
+    <div class="cover-date-badge">{{ report_date }}</div>
+    <div class="cover-tagline">AI &amp; Automation Niche &nbsp;&bull;&nbsp; Data-Driven Insights</div>
+  </div>
+</div>
+
+<!-- ════ PAGE 2: EXECUTIVE SUMMARY ════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Executive Summary</div>
+      <div class="page-subtitle">Key insights from this week's data</div>
+    </div>
+    <div class="report-tag">AI &amp; Automation Report &nbsp;|&nbsp; {{ report_date }}</div>
+  </div>
+  <div class="summary-body">
+    {% for insight in executive_summary %}
+    <div class="insight-card">
+      <div class="insight-number">{{ loop.index }}</div>
+      <div class="insight-text">{{ insight }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="page-footer">
+    <div class="footer-left">AI &amp; Automation YouTube Trends &nbsp;|&nbsp; {{ report_date }}</div>
+    <div class="footer-right">Page 2</div>
+  </div>
+</div>
+
+<!-- ════ PAGE 3: TRENDING KEYWORDS ════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Trending Keywords</div>
+      <div class="page-subtitle">Top 20 keywords ranked by frequency x average view count</div>
+    </div>
+    <div class="report-tag">AI &amp; Automation Report &nbsp;|&nbsp; {{ report_date }}</div>
+  </div>
+  <div class="chart-body">
+    <img src="{{ charts.trending_keywords }}" alt="Trending Keywords Chart">
+    <div class="chart-caption">Weighted score = keyword frequency x avg views / 1K</div>
+  </div>
+  <div class="page-footer">
+    <div class="footer-left">AI &amp; Automation YouTube Trends &nbsp;|&nbsp; {{ report_date }}</div>
+    <div class="footer-right">Page 3</div>
+  </div>
+</div>
+
+<!-- ════ PAGE 4: TOP VIDEOS TABLE ════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Top Performing Videos</div>
+      <div class="page-subtitle">Ranked by engagement rate (likes + comments / views)</div>
+    </div>
+    <div class="report-tag">AI &amp; Automation Report &nbsp;|&nbsp; {{ report_date }}</div>
+  </div>
+  <div class="table-body">
+    <table class="videos">
+      <thead>
+        <tr>
+          <th style="width:30px;">#</th>
+          <th>Title</th>
+          <th>Channel</th>
+          <th>Views</th>
+          <th>Likes</th>
+          <th>Engagement</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in top_videos %}
+        <tr>
+          <td class="rank">{{ loop.index }}</td>
+          <td>{{ v.title[:60] }}{% if v.title|length > 60 %}...{% endif %}</td>
+          <td>{{ v.channel }}</td>
+          <td class="views">{{ "{:,}".format(v.views) }}</td>
+          <td class="views">{{ "{:,}".format(v.likes) }}</td>
+          <td class="engagement">{{ "%.2f"|format(v.engagement_rate * 100) }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="page-footer">
+    <div class="footer-left">AI &amp; Automation YouTube Trends &nbsp;|&nbsp; {{ report_date }}</div>
+    <div class="footer-right">Page 4</div>
+  </div>
+</div>
+
+<!-- ════ PAGE 5: CHANNEL PERFORMANCE ════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Channel Performance</div>
+      <div class="page-subtitle">Average views per video vs engagement rate across tracked channels</div>
+    </div>
+    <div class="report-tag">AI &amp; Automation Report &nbsp;|&nbsp; {{ report_date }}</div>
+  </div>
+  <div class="chart-body">
+    <img src="{{ charts.channel_comparison }}" alt="Channel Comparison Chart">
+  </div>
+  <div class="page-footer">
+    <div class="footer-left">AI &amp; Automation YouTube Trends &nbsp;|&nbsp; {{ report_date }}</div>
+    <div class="footer-right">Page 5</div>
+  </div>
+</div>
+
+<!-- ════ PAGE 6: ENGAGEMENT ANALYSIS ════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Engagement Rate Analysis</div>
+      <div class="page-subtitle">Views vs engagement rate — bubble size proportional to like count</div>
+    </div>
+    <div class="report-tag">AI &amp; Automation Report &nbsp;|&nbsp; {{ report_date }}</div>
+  </div>
+  <div class="chart-body">
+    <img src="{{ charts.engagement_analysis }}" alt="Engagement Analysis Chart">
+    <div class="chart-caption">High engagement + moderate views = strong content-audience fit</div>
+  </div>
+  <div class="page-footer">
+    <div class="footer-left">AI &amp; Automation YouTube Trends &nbsp;|&nbsp; {{ report_date }}</div>
+    <div class="footer-right">Page 6</div>
+  </div>
+</div>
+
+<!-- ════ PAGE 7: CONTENT GAPS ════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Content Gaps &amp; Opportunities</div>
+      <div class="page-subtitle">Topics with high engagement but low saturation — your best content opportunities</div>
+    </div>
+    <div class="report-tag">AI &amp; Automation Report &nbsp;|&nbsp; {{ report_date }}</div>
+  </div>
+  <div class="chart-body">
+    <img src="{{ charts.content_gaps }}" alt="Content Gaps Chart">
+    <div class="chart-caption">Score = engagement strength x (1 - topic saturation)</div>
+  </div>
+  <div class="page-footer">
+    <div class="footer-left">AI &amp; Automation YouTube Trends &nbsp;|&nbsp; {{ report_date }}</div>
+    <div class="footer-right">Page 7</div>
+  </div>
+</div>
+
+<!-- ════ PAGE 8: CONTENT IDEAS ════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Recommended Content Ideas</div>
+      <div class="page-subtitle">Based on trending topics and content gaps identified this week</div>
+    </div>
+    <div class="report-tag">AI &amp; Automation Report &nbsp;|&nbsp; {{ report_date }}</div>
+  </div>
+  <div class="ideas-body">
+    {% for idea in recommended_ideas %}
+    <div class="idea-card">
+      <div class="idea-number">{{ loop.index }}</div>
+      <div class="idea-label">Idea {{ loop.index }}</div>
+      <div class="idea-text">{{ idea }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="page-footer">
+    <div class="footer-left">AI &amp; Automation YouTube Trends &nbsp;|&nbsp; {{ report_date }}</div>
+    <div class="footer-right">Page 8</div>
+  </div>
+</div>
+
+</body>
+</html>
